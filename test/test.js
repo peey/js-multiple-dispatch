@@ -8,6 +8,18 @@ describe("js-multiple-dispatch", function () {
     assert(_.isFunction(add))
   })
   
+  it("works with one defined method", function () {
+    var add = defgeneric("testing")
+    
+    add.defmethod(
+      (a, b) => _.isNumber(a) && _.isNumber(b),
+      function (a, b) {
+        return a + b
+      })
+    
+    assert(add(1,2) == 3)
+  })
+  
   it("should call different methods based on argument checks", function () {
     var add = defgeneric("testing")
     
@@ -22,8 +34,7 @@ describe("js-multiple-dispatch", function () {
       function (a) {
         return a.reduce((a, b) => add(a, b))
       })
-
-
+    
     assert(add(1, 2) == 3)
     assert(add([1,2,3]) == 6)
   })
@@ -46,5 +57,26 @@ describe("js-multiple-dispatch", function () {
     }
     
     assert(threw === true)
+  })
+  
+  describe("sugar", function () {
+    it("should allow defmethod chaining", function () {
+      var add = defgeneric("testing")
+
+      add
+        .defmethod(
+          (a, b) => _.isNumber(a) && _.isNumber(b),
+          function (a, b) {
+            return a + b
+          })
+        .defmethod(
+          (a) => _.isArray(a),
+          function (a) {
+            return a.reduce((a, b) => add(a, b))
+          })
+
+      assert(add(1, 2) == 3)
+      assert(add([1,2,3]) == 6)
+    })
   })
 })

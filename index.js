@@ -11,7 +11,7 @@ var defgeneric = function (docstring) {
     if (found) {
       return found.executor.apply(this, args)
     } else {
-      throw "tantrum"
+      throw new ReferenceError("call to generic function with docstring '" + docstring + "': no matching method found for the arguments " + args.toString())
     }
   }
   

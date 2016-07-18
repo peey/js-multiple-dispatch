@@ -32,7 +32,7 @@ GenericFunction.prototype.strictCallResolver = function (matchingMethods, method
   if (matchingMethods.length > 1) {
     throw new RangeError("generic function does not have discreetely partitioned domain, multiple methods match the given arguments " + methodCallArgs.toString())
   } else {
-    return this.defaultCallResolver(matchingMethods, methodCallContext, methodCallArgs)
+    return this.firstMethodCallResolver(matchingMethods, methodCallContext, methodCallArgs)
   }
 }
 
@@ -48,8 +48,8 @@ GenericFunction.prototype.callResolver = function (matchingMethods, methodCallCo
   }
 }
 
-var defgeneric = function (docstring) {
-  var genericFunction = new GenericFunction(docstring) //has-a relationship
+var defgeneric = function (docstring, callResolverIdentifier) {
+  var genericFunction = new GenericFunction(docstring, callResolverIdentifier) //has-a relationship
   
   var call = function (...methodCallArgs) {
     return genericFunction.call(this, methodCallArgs)

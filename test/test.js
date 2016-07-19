@@ -132,25 +132,25 @@ describe("js-multiple-dispatch", function () {
       assert(test(6) === 6) //no throw
     })
     
-    it("shouldn't throw error or emit warning in first-method mode", function () {
+    it("shouldn't throw error or emit warning in last match mode", function () {
       var stub = this.sinon.stub(console, 'warn')
-      var test = defgeneric("testing", "first-method")
+      var test = defgeneric("testing", "last-match")
       
       test
         .defmethod(
         (a) => a > 3,
         function (a) {
-          return a
+          return a / 2
         })
         .defmethod(
         (a) => a < 5,
         function (a) {
-          return a
+          return a * 2
         })
       
       var threw = false
       try {
-        test(4)
+        assert(test(4) === 8)
       } catch (e) {
         threw = true
       }

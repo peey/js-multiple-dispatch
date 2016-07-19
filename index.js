@@ -13,9 +13,10 @@ GenericFunction.prototype.defmethod = function (check, executor) {
   return this.methods.push({check, executor})
 }
 
-GenericFunction.prototype.firstMethodCallResolver = function (matchingMethods, methodCallContext, methodCallArgs) {
+//last match to allow for specific-matching..
+GenericFunction.prototype.lastMatchCallResolver = function (matchingMethods, methodCallContext, methodCallArgs) {
   if (matchingMethods.length >= 1) {
-    return matchingMethods[0].executor.apply(methodCallContext, methodCallArgs)
+    return matchingMethods[matchingMethods.length - 1].executor.apply(methodCallContext, methodCallArgs)
   } else {
     throw new ReferenceError("call to generic function with docstring '" + this.docstring + "': no matching method found for the arguments " + methodCallArgs.toString())
   }
@@ -25,14 +26,14 @@ GenericFunction.prototype.warningCallResolver = function (matchingMethods, metho
   if (matchingMethods.length > 1) {
     console.warn("generic function warning: more than one methods match the given arguments " + methodCallArgs.toString() + ", arbitarily selecting the first one")
   }
-  return this.firstMethodCallResolver(matchingMethods, methodCallContext, methodCallArgs)
+  return this.lastMatchCallResolver(matchingMethods, methodCallContext, methodCallArgs)
 }
 
 GenericFunction.prototype.strictCallResolver = function (matchingMethods, methodCallContext, methodCallArgs) {
   if (matchingMethods.length > 1) {
     throw new RangeError("generic function does not have discreetely partitioned domain, multiple methods match the given arguments " + methodCallArgs.toString())
   } else {
-    return this.firstMethodCallResolver(matchingMethods, methodCallContext, methodCallArgs)
+    return this.lastMatchCallResolver(matchingMethods, methodCallContext, methodCallArgs)
   }
 }
 
@@ -42,7 +43,7 @@ GenericFunction.prototype.callResolver = function (matchingMethods, methodCallCo
   //or emit warning (default behavior)
   //or do nothing and just run the first found method
   switch (this.callResolverIdentifier) {
-    case "first-method": return this.firstMethodCallResolver(matchingMethods, methodCallContext, methodCallArgs)
+    case "last-match": return this.lastMatchCallResolver(matchingMethods, methodCallContext, methodCallArgs)
     case "strict": return this.strictCallResolver(matchingMethods, methodCallContext, methodCallArgs)
     default: return this.warningCallResolver(matchingMethods, methodCallContext, methodCallArgs)
   }

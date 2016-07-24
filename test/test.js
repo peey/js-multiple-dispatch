@@ -1,8 +1,9 @@
 var assert = require("assert")
 var _ = require("lodash")
-var defgeneric = require("../index.js")
+var {defgeneric,  NoMatchingMethodError, MultipleMatchingMethodsError} = require("../index.js")
 var sinon = require("sinon")
 require("mocha-sinon")
+
 describe("js-multiple-dispatch", function () {
   it("should return a function", function () {
     var add = defgeneric("testing")

@@ -18,7 +18,7 @@ GenericFunction.prototype.lastMatchCallResolver = function (matchingMethods, met
   if (matchingMethods.length >= 1) {
     return matchingMethods[matchingMethods.length - 1].executor.apply(methodCallContext, methodCallArgs)
   } else {
-    throw new ReferenceError("call to generic function with docstring '" + this.docstring + "': no matching method found for the arguments " + methodCallArgs.toString())
+    throw new NoMatchingMethodError(this.docstring, methodCallArgs)
   }
 }
 
@@ -31,7 +31,7 @@ GenericFunction.prototype.warningCallResolver = function (matchingMethods, metho
 
 GenericFunction.prototype.strictCallResolver = function (matchingMethods, methodCallContext, methodCallArgs) {
   if (matchingMethods.length > 1) {
-    throw new RangeError("generic function does not have discreetely partitioned domain, multiple methods match the given arguments " + methodCallArgs.toString())
+    throw new MultipleMatchingMethodsError(this.docstring, methodCallArgs)
   } else {
     return this.lastMatchCallResolver(matchingMethods, methodCallContext, methodCallArgs)
   }
@@ -64,4 +64,40 @@ var defgeneric = function (docstring, callResolverIdentifier) {
   })
 }
 
-module.exports = defgeneric
+var NoMatchingMethodError = function (docstring, args, errObj) {
+  Object.assign (
+    this,
+    errObj? errObj : new Error(), //for properties like stacktrace etc
+    {
+      name: "generic functions: no matching method error",
+      message: "call to generic function failed, no matching method found. Please see .docstring and .args properties of this error for more details" ,
+      docstring: docstring,
+      offendingArguments: args
+    }
+  )
+}
+
+NoMatchingMethodError.prototype = Object.create(Error.prototype)
+NoMatchingMethodError.prototype.constructor = NoMatchingMethodError
+
+var MultipleMatchingMethodsError = function (docstring, args) {
+  Object.assign (
+    this,
+    errObj? errObj : new Error(), //for properties like stacktrace etc
+    {
+      name: "generic functions: multiple matching methods error",
+      message: "generic function does not have discreetely partitioned domain, multiple methods match the given arguments " ,
+      docstring: docstring,
+      offendingArguments: args
+    }
+  )
+}
+
+MultipleMatchingMethodsError.prototype = Object.create(Error.prototype)
+MultipleMatchingMethodsError.prototype.constructor = MultipleMatchingMethodsError
+
+module.exports = {
+  defgeneric,
+  NoMatchingMethodError,
+  MultipleMatchingMethodsError
+}
